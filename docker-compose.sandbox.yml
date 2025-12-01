@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  mongo:
+    # Overrides the base compose mapping so the sandbox Mongo runs in the
+    # compose network but does not publish port 27017 on the host. This
+    # avoids "bind for 0.0.0.0:27017 failed: port is already allocated" when
+    # a local mongo is already running.
+    ports: []

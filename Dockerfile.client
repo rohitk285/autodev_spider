@@ -1,0 +1,18 @@
+# Build stage
+FROM node:18-alpine AS build
+WORKDIR /usr/src/app
+
+# Copy only frontend package files to install deps
+COPY frontend/package*.json ./frontend/
+WORKDIR /usr/src/app/frontend
+RUN npm ci
+
+# Copy frontend source and build
+COPY frontend/ ./
+RUN npm run build
+
+# Production image (serve with lightweight nginx)
+FROM nginx:alpine
+COPY --from=build /usr/src/app/frontend/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

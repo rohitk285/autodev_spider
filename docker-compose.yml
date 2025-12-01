@@ -1,0 +1,60 @@
+services:
+  mongo:
+    image: mongo:6.0
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    labels:
+      sandbox.role: "database"
+      sandbox.scope: "test-environment"
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    environment:
+      - PORT=3000
+      - MONGO_URI=mongodb://mongo:27017/moviesApp
+      - JWT_SECRET=change_this_in_production
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+    labels:
+      sandbox.role: "backend"
+      sandbox.scope: "test-environment"
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    ports:
+      - "5173:80"
+    depends_on:
+      - server
+    labels:
+      sandbox.role: "frontend"
+      sandbox.scope: "test-environment"
+
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      - NODE_ENV=test
+      - CI=true
+      - MONGO_URI=mongodb://mongo:27017/moviesApp
+    depends_on:
+      - mongo
+    restart: "no"
+    labels:
+      sandbox.role: "tests"
+      sandbox.scope: "test-environment"
+
+volumes:
+  mongo-data:

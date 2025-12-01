@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  mongo:
+    # If host port 27017 is in use, map the container's 27017 to 27018 on the
+    # host so the sandbox can still run without conflicting with a local
+    # MongoDB daemon. This keeps the container reachable for debugging while
+    # avoiding the default port collision.
+    ports:
+      - "27018:27017"

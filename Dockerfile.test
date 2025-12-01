@@ -1,0 +1,28 @@
+FROM node:18
+
+# Use Debian-based Node image (node:18) so we can install small OS tools if
+# required. We'll install netcat to wait for the MongoDB service in compose
+WORKDIR /usr/src/app
+
+# copy package files & install dev deps
+COPY package*.json ./
+RUN npm ci
+
+# copy source
+COPY . .
+
+# Install a tiny tool (netcat) to wait for the mongo service before running tests
+RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
+# Provide a default MONGO_URI pointing to the compose `mongo` service so
+# tests inside containers connect to the service instead of starting
+# mongodb-memory-server (which tries to download binaries and can fail).
+ENV MONGO_URI=mongodb://mongo:27017/moviesApp
+
+ENV NODE_ENV=test
+
+# Wait for Mongo then run tests (this is robust for compose-run one-off jobs)
+#
+#
+#
+CMD sh -c 'until nc -z $(echo ${MONGO_URI} | sed -E "s#^mongodb://([^:/]+).*#\1#") 27017; do echo waiting for mongo; sleep 1; done; npm test'
