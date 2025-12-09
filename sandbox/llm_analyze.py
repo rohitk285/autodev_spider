@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-Run sandbox → collect test logs → send to Gemini → save analysis.
+Run sandbox → collect test logs → send to Gemini → save analysis → keep running and open browser.
 """
 
 import os
 import json
 import subprocess
+import time
+import webbrowser
 from datetime import datetime
 from pathlib import Path
 
@@ -52,6 +54,7 @@ def safe_read(path: Path, max_chars=20000):
 def run_sandbox_tests():
     """
     Returns dict: {filename -> file_path}
+    Returns tuple: (results_dict, manager) where manager is kept for later container control
     """
     # Import gracefully: when running this file directly (python sandbox/llm_analyze.py)
     # sys.path[0] becomes the sandbox/ directory which prevents 'import sandbox' to
@@ -78,7 +81,7 @@ def run_sandbox_tests():
 
     if SandboxManager is None:
         print("[sandbox] Could not import SandboxManager: not available in environment or file system")
-        return None
+        return None, None
 
     mgr = SandboxManager("mern-sandbox")
 
@@ -87,14 +90,10 @@ def run_sandbox_tests():
         results = mgr.run_tests()   # returns dict
     except Exception as e:
         print("[sandbox] Test execution failed:", e)
-        return None
-    finally:
-        try:
-            mgr.stop_sandbox()
-        except:
-            pass
-
-    return results
+        return None, mgr
+    
+    # Don't stop sandbox — keep it running for browser display
+    return results, mgr
 
 # ----------------------------
 # 2. LOCAL fallback
@@ -148,6 +147,14 @@ def call_gemini(prompt: str):
             "https://generativelanguage.googleapis.com/v1beta/"
             "models/gemini-2.5-pro:generateContent?key=" + GEMINI_API_KEY
         )
+    else:
+        # If a custom GEMINI_API_URL is provided but doesn't include a key
+        # parameter, append the API key so callers without other identity
+        # forms are authorized. This matches the fallback URL behaviour
+        # when only GEMINI_API_KEY is provided.
+        if GEMINI_API_KEY and "key=" not in url:
+            sep = "&" if "?" in url else "?"
+            url = url + f"{sep}key={GEMINI_API_KEY}"
 
     payload = {"contents": [{"parts": [{"text": prompt}]}]}
 
@@ -222,6 +229,62 @@ def local_analysis(logs):
         "Summary of logs:\n" + combined[:2000]
     )
 
+# ----------------------------
+# Wait for app to be ready
+# ----------------------------
+def wait_for_app(host="http://localhost:5173", timeout=120):
+    """Poll the frontend until it responds successfully."""
+    import urllib.request
+    import urllib.error
+    
+    print(f"Checking if app is running on {host}")
+    start = time.time()
+    while time.time() - start < timeout:
+        try:
+            urllib.request.urlopen(host, timeout=5)
+            print(f"✓ Application is ready at {host}")
+            return True
+        except (urllib.error.URLError, urllib.error.HTTPError) as e:
+            elapsed = time.time() - start
+            print(f"Waiting for app... ({elapsed:.0f}s) - {type(e).__name__}")
+            time.sleep(2)
+    
+    print(f"✗ Application did not respond within {timeout} seconds on {host}")
+    return False
+
+# ----------------------------
+# Open browser
+# ----------------------------
+def open_browser(url="http://localhost:5173"):
+    """Open the application in the default browser."""
+    try:
+        print(f"Opening {url} in browser...")
+        webbrowser.open(url)
+    except Exception as e:
+        print(f"Could not open browser automatically: {e}")
+        print(f"Please open {url} manually in your browser.")
+
+# ----------------------------
+# Check container status
+# ----------------------------
+def check_containers(mgr):
+    """Check if containers are running and show their status."""
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["docker", "ps", "--filter", "label=sandbox.scope=test-environment", "--format", "table {{.Names}}\t{{.Status}}"],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        if result.returncode == 0:
+            print("\n=== Container Status ===")
+            print(result.stdout)
+        return result.returncode == 0
+    except Exception as e:
+        print(f"Could not check container status: {e}")
+        return False
+
 
 def collect_existing_logs(limit_files: int = 20, max_chars: int = 20000) -> dict:
     """Collect text files from logs/ (most recent first) and return as {name: content}.
@@ -252,6 +315,8 @@ def main():
     print("=== Running sandbox tests ===")
 
     logs = {}
+    results = None
+    mgr = None
 
     # If logs folder already contains files, prefer those rather than starting
     # a sandbox run. This speeds up iterative use and avoids long Docker startup
@@ -261,7 +326,7 @@ def main():
         logs = collect_existing_logs()
     else:
         # 1. Try sandbox
-        results = run_sandbox_tests()
+        results, mgr = run_sandbox_tests()
     if results:
         for name, path in results.items():
             logs[name] = safe_read(Path(path))
@@ -306,8 +371,36 @@ def main():
     # Save analysis
     LOG_DIR.mkdir(exist_ok=True, parents=True)
     outfile = LOG_DIR / f"analysis_result_{now_ts()}.txt"
-    outfile.write_text(response)
+    outfile.write_text(response, encoding="utf-8")
     print("Saved analysis to:", outfile)
+
+    # Keep containers running if they were started
+    if mgr:
+        print("\n=== Keeping containers running ===")
+        check_containers(mgr)
+        print("Waiting for application to be ready...")
+        if wait_for_app():
+            open_browser()
+            print("\n✓ Application is open in your browser.")
+            print("Containers will continue running. Press Ctrl+C to stop them.")
+            try:
+                while True:
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                print("\nStopping containers...")
+                try:
+                    mgr.stop_sandbox()
+                except:
+                    pass
+        else:
+            print("Could not reach application. Showing container logs...")
+            check_containers(mgr)
+            print("\nNote: Check container logs above to diagnose startup issues.")
+            print("You can manually stop containers with: python sandbox/run_sandbox.py (and Ctrl+C)")
+            try:
+                mgr.stop_sandbox()
+            except:
+                pass
 
     return 0
 

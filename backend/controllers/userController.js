@@ -6,6 +6,15 @@ import createToken from "../utils/createToken.js";
 const createUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
 
+  // DEBUG: log incoming body for failing tests (temporary)
+  try {
+    // avoid leaking sensitive data in production — this is for local test debugging only
+    // eslint-disable-next-line no-console
+    console.log("[debug] createUser body:", { username, email, password: password ? "<redacted>" : undefined });
+  } catch (e) {
+    // ignore logging failures
+  }
+
   if (!username || !email || !password) {
     return res.status(400).json({ message: "Please fill all the fields (username, email, password)" });
   }
@@ -34,6 +43,11 @@ const createUser = asyncHandler(async (req, res) => {
       isAdmin: newUser.isAdmin,
     });
   } catch (error) {
+    // DEBUG: surface save errors to logs to help test debugging
+    try {
+      // eslint-disable-next-line no-console
+      console.error("[debug] createUser save error:", error && error.message ? error.message : error);
+    } catch (e) {}
     // Persist an explicit JSON error response instead of throwing — this
     // helps tests and callers to get a structured message and avoids
     // ambiguous 500/400 situations.
