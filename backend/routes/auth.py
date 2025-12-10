@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends
+from fastapi import APIRouter,Depends,status,Response
 from pydantic import BaseModel
 from models import User as UserModel
 from database import get_db
@@ -28,15 +28,17 @@ class User(BaseModel):
 def auth():
     return {"success" : "valid route"}
 
-@authrouter.post("/register")
+@authrouter.post("/register",status_code = 200)
 async def register_user(
     user_data : UserRegister,
-    db : Session = Depends(get_db)):
+    response : Response,
+    db : Session = Depends(get_db),):
 
     oldusername = db.query(UserModel).filter(UserModel.username == user_data.username).first()
     oldemail = db.query(UserModel).filter(UserModel.email == user_data.email).first()
 
     if oldusername or oldemail:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"failed" : "username or email already exists"}
 
     new_user = UserModel(
@@ -50,16 +52,18 @@ async def register_user(
     db.commit()
     db.refresh(new_user)
 
-    return {"email" : user_data.email , "username" : user_data.username,"msg" : "new record created","id":new_user}
+    return {"email" : user_data.email , "username" : user_data.username,"msg" : "new record created","user_id":new_user.id}
 
 @authrouter.post("/signin")
 async def user_signin(
     user_data : UserSignin,
+    response : Response,
     db : Session = Depends(get_db)):
 
     dbusername = db.query(UserModel).filter(UserModel.username == user_data.username, UserModel.hashed_password == user_data.password).first()
 
     if not dbusername:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"failed" : "incorrect username or password"}
     
-    return {"success" : "login success","username" : user_data.username}
+    return {"success" : "login success","username" : user_data.username,"user_id":dbusername.id}
