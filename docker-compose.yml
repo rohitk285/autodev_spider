@@ -1,0 +1,69 @@
+
+services:
+  # --------------------
+  # 1. PostgreSQL Database Service
+  # --------------------
+  db:
+    image: postgres:15-alpine # Use a lightweight, stable image
+    container_name: postgres_db
+    environment:
+      # These variables set up the initial database, user, and password
+      POSTGRES_USER: autodev2025
+      POSTGRES_PASSWORD: spideysense
+      POSTGRES_DB: dev
+    volumes:
+      # Persist the data on your host machine to avoid losing it when the container stops
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      # Optional: Map the internal port to a port on your host machine (e.g., 5432)
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U autodev2025 -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --------------------
+  # 2. FastAPI Backend Service
+  # --------------------
+  backend:
+    build: ./backend # Tells Docker Compose to build using the Dockerfile in the 'backend' directory
+    container_name: fastapi_backend
+    ports:
+      # Map the container's port 8000 to the host's port 8000
+      - "8000:8000"
+    volumes:
+      # Mount the current backend code into the container for easy development/reloads
+      # Omit this in production
+      - ./backend:/app
+    depends_on:
+      # Ensure the 'db' container starts before the 'backend' container
+      db:
+        condition: service_healthy
+    environment:
+      # Crucial: The HOST is now the name of the PostgreSQL service in Docker Compose
+      # Format: postgresql://USER:PASSWORD@SERVICE_NAME:PORT/DB_NAME
+      DATABASE_URL: postgresql://autodev2025:spideysense@db:5432/dev
+    restart: unless-stopped
+    
+  #---------------------
+  # 3. Frontend Service
+  #---------------------
+  frontend:
+    build: 
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    container_name: react_frontend
+    ports:
+      # Map the internal Nginx port (80) to the host port (e.g., 3000)
+      - "3000:80"
+    # Ensure the frontend starts only after the backend is ready (optional, but clean)
+    depends_on:
+      backend:
+        condition: service_started
+    restart: always
+
+# Define the volume used for persistent data
+volumes:
+  postgres_data:

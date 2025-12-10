@@ -1,0 +1,39 @@
+# ----------------------------------------------------------------------
+# 1. DEPENDENCY DIRECTORIES
+# ----------------------------------------------------------------------
+
+# Python/FastAPI Dependencies
+backend/__pycache__/
+backend/.pytest_cache/
+backend/venv/              # Python Virtual Environment
+backend/.venv/
+**/*.pyc                   # Compiled Python files
+venv/
+.venv/
+# Node/React/Vite Dependencies
+frontend/node_modules/     # Node modules folder
+frontend/dist/             # Frontend build output (built by Vite/npm run build)
+
+# ----------------------------------------------------------------------
+# 2. ENVIRONMENT AND CONFIGURATION FILES (CRITICAL SECURITY)
+# ----------------------------------------------------------------------
+
+# Environment files (MUST NOT be committed as they contain passwords/secrets)
+.env                       # The main environment variables file
+.env.*.local
+frontend/.env
+backend/.env
+
+# Local configuration files
+.vscode/                   # VS Code configuration (unless shared)
+.idea/                     # JetBrains/PyCharm configuration
+
+# ----------------------------------------------------------------------
+# 3. DOCKER ARTIFACTS
+# ----------------------------------------------------------------------
+
+# Docker specific files
+*.swp
+*.bak
+*.orig
+*.log
