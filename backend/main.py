@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
+from routes import api_router
 import models
 
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -24,6 +25,8 @@ app.add_middleware(
 async def read_root():
     return {"Hello" : "Fast API"}
 
-@app.get("/api/")
-async def root():
-    return {"Message" : "Success the application is working"}
+app.include_router(api_router)
+
+# @app.get("/api/")
+# async def root():
+#     return {"Message" : "Success the application is working"}
