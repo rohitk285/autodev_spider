@@ -1,0 +1,44 @@
+{
+  "frontend_prompt": {
+    "description": "As a frontend developer, create a React application with the necessary components and functionality for the TODO web application.",
+    "tasks": [
+      "Design and implement the user interface for the task list, including a form for adding new tasks and buttons for editing and deleting existing tasks.",
+      "Integrate a library or component for user authentication (e.g. React Auth, React Context API) and connect it to the backend REST endpoints.",
+      "Implement the logic for rendering the task list, including fetching data from the backend and updating the list when tasks are added, edited, or deleted.",
+      "Add input validation for user inputs in the form, such as task name and description.",
+      "Implement basic error handling for cases like network errors, invalid API responses, and authentication errors."
+    ],
+    "deliverables": [
+      "A fully functional React application with a task list component, add/edit/delete form, and user authentication",
+      "Implementation of validation and error handling for user inputs and API responses"
+    ]
+  },
+  "backend_prompt": {
+    "description": "As a backend developer, design and implement the FastAPI application with REST endpoints for task management and user authentication.",
+    "tasks": [
+      "Design and implement a set of REST endpoints for CRUD operations on tasks, including GET, POST, PUT, and DELETE",
+      "Implement user authentication and authorization using FastAPI's built-in support for authentication and authorization",
+      "Use a library like Pydantic for data validation and validation of user inputs",
+      "Implement basic error handling for API requests, including validation and authentication errors",
+      "Setup and configure PostgreSQL database connections and queries for CRUD operations"
+    ],
+    "deliverables": [
+      "A fully functional FastAPI application with REST endpoints for task management and user authentication",
+      "Implementation of validation and error handling for API requests and database queries"
+    ]
+  },
+  "database_prompt": {
+    "description": "As a database developer, design and implement the PostgreSQL database schema for the TODO web application.",
+    "tasks": [
+      "Design the database schema for tasks, including tables for tasks, users, and task lists",
+      "Create indexes on relevant columns for efficient query performance",
+      "Implement relationships between tables using foreign keys",
+      "Setup and configure PostgreSQL database user accounts and permissions for the backend application",
+      "Test and verify that the database schema is correctly implemented and functional"
+    ],
+    "deliverables": [
+      "A fully functional PostgreSQL database schema for tasks, users, and task lists",
+      "Setup and configuration of PostgreSQL database user accounts and permissions"
+    ]
+  }
+}

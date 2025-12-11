@@ -1,6 +1,7 @@
 from langgraph.graph import StateGraph
 from pydantic import BaseModel
 from groq import Groq
+import os
 
 
 class MasterState(BaseModel):
@@ -27,12 +28,13 @@ def master_agent_node(state: MasterState):
     - frontend_prompt
     - backend_prompt
     - database_prompt
+    Each must have it's description, tasks and the deliverables. 
 
     DO NOT generate code. Only produce text prompts.
     STRICTLY output only valid JSON. Make no mistakes. 
     """
 
-    client = Groq(api_key="YOUR_API_KEY")
+    client = Groq(api_key="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")
 
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
@@ -79,7 +81,11 @@ def main():
         "backend_prompt": final_state.get("backend_prompt"),
         "database_prompt": final_state.get("database_prompt"),
     }
-    print(json.dumps(output, indent=2, ensure_ascii=False))
+    output_path = os.path.join(os.getcwd(), "prompts.json")
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(output, f, indent=2, ensure_ascii=False)
+
+    print(f"Output written to {output_path}")
 
 
 if __name__ == "__main__":
