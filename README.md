@@ -172,7 +172,7 @@ If there are errors:
 4. System iterates (max 3 attempts)
 5. Results are re-deployed
 
-## 📁 Project Structure
+## 📁 Project Structure of Agentic Components
 
 ```
 AutoV2/
