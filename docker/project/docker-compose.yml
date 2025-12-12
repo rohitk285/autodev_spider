@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tododb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/tododb
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://backend:8000
+    ports:
+      - "5173:5173"
+    # Avoid bind-mounting the host frontend directory to prevent host
+    # `node_modules` (Windows) from overriding the container's Linux
+    # installation. Rebuild the image after changes instead of mounting.
+
+volumes:
+  pgdata:

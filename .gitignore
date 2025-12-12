@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*~
+*.sqlite3
+*.db
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+
+# Distribution
+build/
+dist/
+*.egg-info/
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.env
+.env
+
+# Output and logs
+output/
+*.log
+
+# Tests
+.pytest_cache/
+
+# Node / Frontend
+node_modules/
+
+# Others
+pip-wheel-metadata/
+
+# Keep the file with API keys out of the repo
+# (Remove the file from the index if already committed)

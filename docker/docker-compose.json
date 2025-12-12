@@ -1,0 +1,5 @@
+{
+  "docker-compose.yml": "services:\n  db:\n    image: postgres:15\n    restart: unless-stopped\n    environment:\n      POSTGRES_USER: postgres\n      POSTGRES_PASSWORD: postgres\n      POSTGRES_DB: tododb\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U postgres\"]\n      interval: 3s\n      timeout: 3s\n      retries: 5\n\n  backend:\n    build: ./backend\n    depends_on:\n      db:\n        condition: service_healthy\n    environment:\n      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/tododb\n    ports:\n      - \"8000:8000\"\n    volumes:\n      - ./backend:/app\n\n  frontend:\n    build: ./frontend\n    depends_on:\n      - backend\n    environment:\n      VITE_API_URL: http://backend:8000\n    ports:\n      - \"5173:5173\"\n    # Avoid bind-mounting the host frontend directory to prevent host\n    # `node_modules` (Windows) from overriding the container's Linux\n    # installation. Rebuild the image after changes instead of mounting.\n\nvolumes:\n  pgdata:\n",
+  
+  ".env": "POSTGRES_USER=postgres\nPOSTGRES_PASSWORD=postgres\nPOSTGRES_DB=tododb\n"
+}
