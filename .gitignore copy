@@ -1,0 +1,73 @@
+# ----------------------------------------------------------------------
+# 1. DEPENDENCY DIRECTORIES
+# ----------------------------------------------------------------------
+
+# Python/FastAPI Dependencies
+backend/__pycache__/
+backend/.pytest_cache/
+backend/venv/              # Python Virtual Environment
+backend/.venv/
+**/*.pyc                   # Compiled Python files
+venv/
+.venv/
+# Node/React/Vite Dependencies
+frontend/node_modules/     # Node modules folder
+frontend/dist/             # Frontend build output (built by Vite/npm run build)
+
+.env                       # The main environment variables file
+.env.*.local
+frontend/.env
+backend/.env
+
+# Local configuration files
+.vscode/                   # VS Code configuration (unless shared)
+.idea/                     # JetBrains/PyCharm configuration
+
+*.swp
+*.bak
+*.orig
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*~
+*.sqlite3
+*.db
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+
+# Distribution
+build/
+dist/
+*.egg-info/
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.env
+.env
+
+# Output and logs
+output/
+*.log
+
+# Tests
+.pytest_cache/
+
+# Node / Frontend
+node_modules/
+
+pip-wheel-metadata/
+
+

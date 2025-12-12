@@ -1,0 +1,114 @@
+/* frontend/src/index.css - Modern, Clean Base Styles */
+
+:root {
+  --primary-color: #007bff; /* Blue */
+  --secondary-color: #6c757d; /* Gray */
+  --success-color: #28a745; /* Green */
+  --danger-color: #dc3545; /* Red */
+  --background-light: #f4f7f6; /* Light gray background */
+  --card-background: #ffffff; /* White card background */
+  --border-color: #e0e6e9;
+  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Global Reset and Body Styling */
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-family);
+  background-color: var(--background-light);
+  color: #343a40;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* --- Form and Input Styling --- */
+
+.auth-container, .login-form, .register-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+input[type="text"], 
+input[type="email"], 
+input[type="password"] {
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+/* --- Button Styling --- */
+
+button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.primary-button {
+  background-color: var(--primary-color);
+  color: white;
+  margin-top: 10px;
+}
+.primary-button:hover {
+  background-color: #0056b3;
+}
+
+.danger-button {
+    background-color: var(--danger-color);
+    color: white;
+}
+.danger-button:hover {
+    background-color: #bd2130;
+}
+
+/* --- Links and Utility --- */
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+.error-message {
+  color: var(--danger-color);
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.success-message {
+  color: var(--success-color);
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}

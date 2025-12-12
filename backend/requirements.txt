@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+sqlalchemy==2.0.*
+psycopg2-binary
+authlib 
+python-jose 
+passlib[bcrypt] 
+python-multipart
+python-dotenv
